@@ -1,16 +1,16 @@
 import javax.swing.*;
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.util.List;
 
 public class ResultPanel {
     private JPanel panel;
     private JTextArea resultArea;
     private CriteriaPanel criteriaPanel;
-    private AlternativesPanel alternativesPanel; // Добавляем панель с альтернативами
+    private AlternativesPanel alternativesPanel;
 
-    public ResultPanel(CriteriaPanel criteriaPanel) {
+    public ResultPanel(CriteriaPanel criteriaPanel, AlternativesPanel alternativesPanel) {
         this.criteriaPanel = criteriaPanel;
-        this.alternativesPanel = alternativesPanel;
+        this.alternativesPanel = alternativesPanel; // Инициализация панели с альтернативами
         initialize();
     }
 
@@ -33,38 +33,34 @@ public class ResultPanel {
     }
 
     private void calculateBestAlternative() {
+        // Получение весов критериев
         double[] criteriaWeights = criteriaPanel.getCriteriaWeights();
-        if (criteriaWeights == null) {
-            resultArea.setText("Не удалось получить веса критериев. Проверьте введенные данные.");
+        if (criteriaWeights == null || criteriaWeights.length == 0) {
+            resultArea.setText("Критерии не заданы. Пожалуйста, рассчитайте критерии перед расчетом альтернатив.");
             return;
         }
 
-        List<Object[]> alternatives = alternativesPanel.getAlternatives(); // Метод для получения списка альтернатив
-        if (alternatives.isEmpty()) {
-            resultArea.setText("Список альтернатив пуст. Добавьте альтернативы.");
+        // Получение альтернатив
+        List<Object[]> alternatives = alternativesPanel.getAlternatives();
+        if (alternatives == null || alternatives.isEmpty()) {
+            resultArea.setText("Альтернативы не заданы. Пожалуйста, добавьте альтернативы перед расчетом.");
             return;
         }
 
-        Object[] bestAlternative = null;
-        double highestScore = Double.NEGATIVE_INFINITY;
+        double bestScore = -1;
+        String bestAlternative = "";
 
-        // Проходимся по всем альтернативам
-        for (Object[] alternative : alternatives) {
-            double score = calculateScore(alternative, criteriaWeights);
-            if (score > highestScore) {
-                highestScore = score;
-                bestAlternative = alternative;
+        for (Object[] altData : alternatives) {
+            String altName = (String) altData[0];
+            double score = calculateScore(altData, criteriaWeights);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestAlternative = altName;
             }
         }
 
-        // Выводим результаты
-        if (bestAlternative != null) {
-            resultArea.setText("Наилучшая альтернатива:\n");
-            resultArea.append("Название: " + bestAlternative[0] + "\n");
-            resultArea.append("Оценка: " + String.format("%.2f", highestScore) + "\n");
-        } else {
-            resultArea.setText("Не удалось определить наилучшую альтернативу.");
-        }
+        resultArea.setText("Лучшее место для отдыха: " + bestAlternative + "\nИтоговый балл: " + bestScore);
     }
 
     private double calculateScore(Object[] alternative, double[] criteriaWeights) {
@@ -80,4 +76,3 @@ public class ResultPanel {
         return score;
     }
 }
-

@@ -16,7 +16,7 @@ public class DecisionSupportSystem {
 
         criteriaPanel = new CriteriaPanel();
         alternativesPanel = new AlternativesPanel();
-        resultPanel = new ResultPanel(criteriaPanel);
+        resultPanel = new ResultPanel(criteriaPanel, alternativesPanel); // Передаем оба объекта в ResultPanel
 
         tabbedPane.addTab("Критерии", criteriaPanel.getPanel());
         tabbedPane.addTab("Альтернативы", alternativesPanel.getPanel());
