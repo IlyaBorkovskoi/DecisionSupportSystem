@@ -40,6 +40,16 @@ public class ResultPanel {
             return;
         }
 
+        // Проверка суммы весов (должна быть близка к 1.0)
+        double sumWeights = 0.0;
+        for (double weight : criteriaWeights) {
+            sumWeights += weight;
+        }
+        if (Math.abs(sumWeights - 1.0) > 0.001) {
+            resultArea.setText("Ошибка: сумма весов критериев не равна 1. Текущая сумма: " + sumWeights);
+            return;
+        }
+
         // Получение альтернатив
         List<Object[]> alternatives = alternativesPanel.getAlternatives();
         if (alternatives == null || alternatives.isEmpty()) {

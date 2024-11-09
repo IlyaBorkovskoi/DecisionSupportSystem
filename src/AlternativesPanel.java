@@ -2,7 +2,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
-import java.awt.BorderLayout;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -44,16 +43,37 @@ public class AlternativesPanel {
         if (!altName.isEmpty()) {
             Object[] row = new Object[alternativesTableModel.getColumnCount()];
             row[0] = altName;
+
+            // Запрашиваем значения для каждого критерия и проверяем, что они являются числами
+            for (int i = 1; i < row.length; i++) {
+                String criterionValue = JOptionPane.showInputDialog(panel, "Введите числовое значение для " + alternativesTableModel.getColumnName(i) + ":");
+                if (criterionValue == null || !isNumeric(criterionValue)) {
+                    JOptionPane.showMessageDialog(panel, "Ошибка: значение критерия должно быть числом.");
+                    return;
+                }
+                row[i] = criterionValue;
+            }
+
             alternativesTableModel.addRow(row);
             saveAlternativeToFile(row);
             altNameField.setText("");
         }
     }
 
+    // Проверка, что строка является числовым значением
+    private boolean isNumeric(String str) {
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     private void saveAlternativeToFile(Object[] alternativeData) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("alternatives.txt", true))) {
             for (int i = 0; i < alternativeData.length; i++) {
-                writer.print(alternativeData[i] == null ? "" : alternativeData[i].toString());
+                writer.print(alternativeData[i] == null ? "" : alternativeData[i].toString().replace(",", ""));
                 if (i < alternativeData.length - 1) {
                     writer.print(",");
                 }
@@ -67,14 +87,13 @@ public class AlternativesPanel {
     private void loadAlternativesFromFile() {
         File file = new File("alternatives.txt");
         if (!file.exists()) {
-            JOptionPane.showMessageDialog(panel, "Файл alternatives.txt не найден.");
-            return;
+            return; // Если файл не существует, просто возвращаемся
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(",");
+                String[] values = line.split(",", -1); // -1 чтобы сохранить пустые значения
                 if (values.length == alternativesTableModel.getColumnCount()) {
                     alternativesTableModel.addRow(values);
                 } else {
@@ -85,6 +104,7 @@ public class AlternativesPanel {
             JOptionPane.showMessageDialog(panel, "Ошибка при загрузке альтернатив из файла.");
         }
     }
+
     public List<Object[]> getAlternatives() {
         List<Object[]> alternatives = new ArrayList<>();
         for (int i = 0; i < alternativesTableModel.getRowCount(); i++) {
@@ -96,6 +116,7 @@ public class AlternativesPanel {
         }
         return alternatives;
     }
+
     public JPanel getPanel() {
         return panel;
     }

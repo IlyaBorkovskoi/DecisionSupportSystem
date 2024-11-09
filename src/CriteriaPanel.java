@@ -20,6 +20,7 @@ public class CriteriaPanel {
     private void initialize() {
         panel = new JPanel(new BorderLayout());
 
+        // Панель ввода критериев
         JPanel criteriaInputPanel = new JPanel(new GridLayout(6, 2));
         criteriaFields = new JTextField[6];
         for (int i = 0; i < 6; i++) {
@@ -28,10 +29,12 @@ public class CriteriaPanel {
             criteriaInputPanel.add(criteriaFields[i]);
         }
 
+        // Таблица для матрицы попарного сравнения
         comparisonTableModel = new DefaultTableModel(6, 6);
         comparisonTable = new JTable(comparisonTableModel);
         comparisonTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
 
+        // Кнопки
         calculateButton = new JButton("Рассчитать данные критерий");
         calculateButton.addActionListener(e -> calculateCriteria());
 
@@ -42,6 +45,7 @@ public class CriteriaPanel {
         buttonPanel.add(calculateButton);
         buttonPanel.add(resetButton);
 
+        // Добавление компонентов на панель
         panel.add(criteriaInputPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(comparisonTable), BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -58,9 +62,15 @@ public class CriteriaPanel {
                 return;
             }
         }
+
+        calculateWeights();
+        if (criteriaWeights == null) {
+            JOptionPane.showMessageDialog(panel, "Ошибка при расчёте весов. Пожалуйста, проверьте введенные данные.");
+            return;
+        }
+
         updateComparisonTableHeaders();
         fillComparisonMatrix();
-        calculateWeights();
         JOptionPane.showMessageDialog(panel, "Данные критериев рассчитаны.");
     }
 
@@ -74,7 +84,7 @@ public class CriteriaPanel {
 
     private void fillComparisonMatrix() {
         int numCriteria = criteriaFields.length;
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#.####");
 
         for (int i = 0; i < numCriteria; i++) {
             for (int j = 0; j < numCriteria; j++) {
@@ -98,12 +108,22 @@ public class CriteriaPanel {
 
     private void calculateWeights() {
         criteriaWeights = new double[criteriaFields.length];
+        double sum = 0;
+
         for (int i = 0; i < criteriaFields.length; i++) {
             try {
                 criteriaWeights[i] = Double.parseDouble(criteriaFields[i].getText());
+                sum += criteriaWeights[i];
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(panel, "Ошибка в данных: неверный формат значения критерия.");
+                criteriaWeights = null;
                 return;
+            }
+        }
+
+        if (sum != 0) {
+            for (int i = 0; i < criteriaWeights.length; i++) {
+                criteriaWeights[i] /= sum;
             }
         }
     }
@@ -112,6 +132,7 @@ public class CriteriaPanel {
         comparisonTableModel.setRowCount(0);
         comparisonTableModel.setRowCount(6);
         comparisonTableModel.setColumnCount(6);
+        criteriaWeights = null;  // Сброс весов
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
                 comparisonTableModel.setValueAt(null, i, j);
@@ -124,7 +145,7 @@ public class CriteriaPanel {
     }
 
     private static class CustomTableCellRenderer extends DefaultTableCellRenderer {
-        private final DecimalFormat df = new DecimalFormat("#.##");
+        private final DecimalFormat df = new DecimalFormat("#.####");
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
