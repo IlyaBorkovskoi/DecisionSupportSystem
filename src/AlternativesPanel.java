@@ -19,7 +19,16 @@ public class AlternativesPanel {
     private void initialize() {
         panel = new JPanel(new BorderLayout());
 
-        String[] altColumns = {"Название", "Критерий 1", "Критерий 2", "Критерий 3", "Критерий 4", "Критерий 5", "Критерий 6"};
+        String[] altColumns = {
+                "Название",
+                "Стоимость проживания",
+                "Доступность транспорта",
+                "Качество инфраструктуры",
+                "Уровень безопасности",
+                "Достопримечательности и культурные объекты",
+                "Климат и погода"
+        };
+
         alternativesTableModel = new DefaultTableModel(altColumns, 0);
         alternativesTable = new JTable(alternativesTableModel);
         JScrollPane scrollPane = new JScrollPane(alternativesTable);
@@ -60,7 +69,6 @@ public class AlternativesPanel {
         }
     }
 
-    // Проверка, что строка является числовым значением
     private boolean isNumeric(String str) {
         try {
             Double.parseDouble(str);
@@ -87,13 +95,13 @@ public class AlternativesPanel {
     private void loadAlternativesFromFile() {
         File file = new File("alternatives.txt");
         if (!file.exists()) {
-            return; // Если файл не существует, просто возвращаемся
+            return;
         }
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(",", -1); // -1 чтобы сохранить пустые значения
+                String[] values = line.split(",", -1);
                 if (values.length == alternativesTableModel.getColumnCount()) {
                     alternativesTableModel.addRow(values);
                 } else {

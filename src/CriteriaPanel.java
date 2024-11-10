@@ -13,6 +13,15 @@ public class CriteriaPanel {
     private JButton resetButton;
     private double[] criteriaWeights;
 
+    private String[] criteriaNames = {
+            "Стоимость проживания",
+            "Доступность транспорта",
+            "Качество инфраструктуры",
+            "Уровень безопасности",
+            "Достопримечательности и культурные объекты",
+            "Климат и погода"
+    };
+
     public CriteriaPanel() {
         initialize();
     }
@@ -21,16 +30,16 @@ public class CriteriaPanel {
         panel = new JPanel(new BorderLayout());
 
         // Панель ввода критериев
-        JPanel criteriaInputPanel = new JPanel(new GridLayout(6, 2));
-        criteriaFields = new JTextField[6];
-        for (int i = 0; i < 6; i++) {
+        JPanel criteriaInputPanel = new JPanel(new GridLayout(criteriaNames.length, 2));
+        criteriaFields = new JTextField[criteriaNames.length];
+        for (int i = 0; i < criteriaNames.length; i++) {
             criteriaFields[i] = new JTextField();
-            criteriaInputPanel.add(new JLabel("Критерий " + (i + 1) + ":"));
+            criteriaInputPanel.add(new JLabel(criteriaNames[i] + ":"));
             criteriaInputPanel.add(criteriaFields[i]);
         }
 
         // Таблица для матрицы попарного сравнения
-        comparisonTableModel = new DefaultTableModel(6, 6);
+        comparisonTableModel = new DefaultTableModel(criteriaNames.length, criteriaNames.length);
         comparisonTable = new JTable(comparisonTableModel);
         comparisonTable.setDefaultRenderer(Object.class, new CustomTableCellRenderer());
 
@@ -56,8 +65,8 @@ public class CriteriaPanel {
     }
 
     private void calculateCriteria() {
-        for (int i = 0; i < criteriaFields.length; i++) {
-            if (criteriaFields[i].getText().trim().isEmpty()) {
+        for (JTextField field : criteriaFields) {
+            if (field.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(panel, "Пожалуйста, введите все критерии.");
                 return;
             }
@@ -75,19 +84,18 @@ public class CriteriaPanel {
     }
 
     private void updateComparisonTableHeaders() {
-        for (int i = 0; i < criteriaFields.length; i++) {
-            String header = criteriaFields[i].getText();
+        for (int i = 0; i < criteriaNames.length; i++) {
+            String header = criteriaNames[i];
             comparisonTable.getColumnModel().getColumn(i).setHeaderValue(header);
         }
         comparisonTable.getTableHeader().repaint();
     }
 
     private void fillComparisonMatrix() {
-        int numCriteria = criteriaFields.length;
         DecimalFormat df = new DecimalFormat("#.####");
 
-        for (int i = 0; i < numCriteria; i++) {
-            for (int j = 0; j < numCriteria; j++) {
+        for (int i = 0; i < criteriaWeights.length; i++) {
+            for (int j = 0; j < criteriaWeights.length; j++) {
                 if (i == j) {
                     comparisonTableModel.setValueAt("1", i, j);
                 } else if (i < j) {
@@ -130,11 +138,11 @@ public class CriteriaPanel {
 
     private void resetComparisonMatrix() {
         comparisonTableModel.setRowCount(0);
-        comparisonTableModel.setRowCount(6);
-        comparisonTableModel.setColumnCount(6);
+        comparisonTableModel.setRowCount(criteriaNames.length);
+        comparisonTableModel.setColumnCount(criteriaNames.length);
         criteriaWeights = null;  // Сброс весов
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 6; j++) {
+        for (int i = 0; i < criteriaNames.length; i++) {
+            for (int j = 0; j < criteriaNames.length; j++) {
                 comparisonTableModel.setValueAt(null, i, j);
             }
         }
